@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  rserve1:
+    image: r-base:latest
+    container_name: rserve1
+    volumes:
+      - ./Rserve.conf:/etc/Rserve.conf
+    command: >
+      /bin/bash -c "
+      R -e 'install.packages(\"Rserve\", repos=\"http://cran.rstudio.com/\")' &&
+      R CMD Rserve --vanilla --RS-conf /etc/Rserve.conf --RS-set daemon=disable
+      "
+
+  rserve2:
+    image: r-base:latest
+    container_name: rserve2
+    volumes:
+      - ./Rserve.conf:/etc/Rserve.conf
+    command: >
+      /bin/bash -c "
+      R -e 'install.packages(\"Rserve\", repos=\"http://cran.rstudio.com/\")' &&
+      R CMD Rserve --vanilla --RS-conf /etc/Rserve.conf --RS-set daemon=disable
+      "
+
+  rserve3:
+    image: r-base:latest
+    container_name: rserve3
+    volumes:
+      - ./Rserve.conf:/etc/Rserve.conf
+    command: >
+      /bin/bash -c "
+      R -e 'install.packages(\"Rserve\", repos=\"http://cran.rstudio.com/\")' &&
+      R CMD Rserve --vanilla --RS-conf /etc/Rserve.conf --RS-set daemon=disable
+      "
+
+  haproxy:
+    image: haproxy:latest
+    container_name: haproxy
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./haproxy.pem:/etc/haproxy/haproxy.pem:rw
+    command: >
+      /bin/bash -c "
+      echo `id` &&
+      chown haproxy:haproxy /etc/haproxy/haproxy.pem &&
+      exec haproxy -f /usr/local/etc/haproxy/haproxy.cfg
+      "
+    ports:
+      - "8000:8000"
+      - "6311:6311"
+    sysctls:
+      - net.ipv4.ip_unprivileged_port_start=0
